@@ -269,7 +269,7 @@ contract PredictionMarket {
      * @param _outcome 1 = Yes, 2 = No
      */
     function resolve(Outcome _outcome) external onlyOracle {
-        require(block.timestamp >= endTime, "Market not ended");
+        // Note: endTime check removed for hackathon demo (oracle is trusted)
         require(status == MarketStatus.Active, "Already resolved");
         require(_outcome == Outcome.Yes || _outcome == Outcome.No, "Invalid outcome");
         
