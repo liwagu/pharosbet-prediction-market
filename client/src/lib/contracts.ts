@@ -10,13 +10,13 @@
  */
 
 // Pharos Testnet Configuration
-export const PHAROS_CHAIN_ID = 688888;
-export const PHAROS_RPC = "https://testnet.dplabs-internal.com";
-export const PHAROS_EXPLORER = "https://testnet.pharosscan.xyz";
+export const PHAROS_CHAIN_ID = 688689;
+export const PHAROS_RPC = "https://atlantic.dplabs-internal.com";
+export const PHAROS_EXPLORER = "https://atlantic.pharosscan.xyz";
 
 // Contract Addresses (to be updated after deployment)
-export const FACTORY_ADDRESS = "0x0000000000000000000000000000000000000000"; // TODO: Deploy
-export const ORACLE_ADDRESS = "0x0000000000000000000000000000000000000000"; // TODO: Deploy
+export const FACTORY_ADDRESS = "0x438D2864035e9FBec492762b0D01121E843073c5";
+export const ORACLE_ADDRESS = "0x2A079770f114a0D99799Dc81b172670a28a5c094";
 
 // ============ ABIs ============
 

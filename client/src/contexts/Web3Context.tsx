@@ -4,10 +4,10 @@ import { toast } from "sonner";
 
 // Pharos Testnet Configuration
 export const PHAROS_CONFIG = {
-  chainId: "0xA8338", // 688888 in hex
-  chainName: "Pharos Testnet",
-  rpcUrl: "https://testnet.dplabs-internal.com",
-  blockExplorer: "https://testnet.pharosscan.xyz",
+  chainId: "0xA8231", // 688689 in hex
+  chainName: "Pharos Atlantic Testnet",
+  rpcUrl: "https://atlantic.dplabs-internal.com",
+  blockExplorer: "https://atlantic.pharosscan.xyz",
   nativeCurrency: {
     name: "PHAR",
     symbol: "PHAR",

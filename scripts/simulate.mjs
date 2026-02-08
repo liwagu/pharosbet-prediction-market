@@ -16,7 +16,7 @@
 
 import { ethers } from "ethers";
 
-const PHAROS_RPC = "https://testnet.dplabs-internal.com";
+const PHAROS_RPC = "https://atlantic.dplabs-internal.com";
 
 const MARKET_ABI = [
   "function buyYes() external payable",

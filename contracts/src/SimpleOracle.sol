@@ -84,7 +84,7 @@ contract SimpleOracle {
      * @param _outcome 1 = Yes, 2 = No
      */
     function reportOutcome(
-        address _market,
+        address payable _market,
         PredictionMarket.Outcome _outcome
     ) external {
         require(isReporter[msg.sender], "Not a reporter");
@@ -114,7 +114,7 @@ contract SimpleOracle {
      * @notice Finalize the resolution after dispute period
      * @param _market Address of the prediction market
      */
-    function finalizeResolution(address _market) external {
+    function finalizeResolution(address payable _market) external {
         Resolution storage res = resolutions[_market];
         require(!res.finalized, "Already finalized");
         require(res.disputeDeadline > 0, "Not enough confirmations");
@@ -139,7 +139,7 @@ contract SimpleOracle {
      * @notice Emergency resolution by admin (for hackathon demo)
      */
     function emergencyResolve(
-        address _market,
+        address payable _market,
         PredictionMarket.Outcome _outcome
     ) external {
         require(msg.sender == admin, "Only admin");
@@ -154,7 +154,7 @@ contract SimpleOracle {
     
     // ============ View Functions ============
     
-    function getResolutionStatus(address _market) external view returns (
+    function getResolutionStatus(address payable _market) external view returns (
         uint256 _yesVotes,
         uint256 _noVotes,
         bool _finalized,

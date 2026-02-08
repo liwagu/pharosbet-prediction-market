@@ -17,7 +17,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const PHAROS_RPC = "https://testnet.dplabs-internal.com";
+const PHAROS_RPC = "https://atlantic.dplabs-internal.com";
 
 function loadArtifact(name) {
   const p = path.join(__dirname, "..", "out", `${name}.sol`, `${name}.json`);
