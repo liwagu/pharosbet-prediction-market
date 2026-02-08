@@ -47,21 +47,25 @@ export default function CreateMarket() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!isConnected) {
-      connectWallet();
-      return;
-    }
-
+    // Validate form fields first, before wallet connect
     if (!question.trim()) {
       toast.error("Please enter a question");
       return;
     }
     if (!description.trim()) {
-      toast.error("Please enter a description");
+      toast.error("Please enter resolution criteria");
       return;
     }
     if (!endDate) {
       toast.error("Please set an end date");
+      return;
+    }
+
+    if (!isConnected) {
+      toast.info("Connect your wallet to create a market", {
+        description: "Your form data will be preserved.",
+      });
+      connectWallet();
       return;
     }
 

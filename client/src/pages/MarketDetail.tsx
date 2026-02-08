@@ -100,9 +100,22 @@ export default function MarketDetail() {
   const shareUrl = `${window.location.origin}/market/${market.id}`;
   const shareText = `🔮 "${market.question}" — Currently ${market.yesPrice}% YES. What do you think? Predict now on PharosBet!`;
 
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
-    toast.success("Link copied to clipboard!");
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
+      toast.success("Link copied to clipboard!");
+    } catch {
+      // Fallback for environments where clipboard API is not available
+      const textArea = document.createElement("textarea");
+      textArea.value = `${shareText}\n${shareUrl}`;
+      textArea.style.position = "fixed";
+      textArea.style.opacity = "0";
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
+      toast.success("Link copied to clipboard!");
+    }
     setShowShareMenu(false);
   };
 

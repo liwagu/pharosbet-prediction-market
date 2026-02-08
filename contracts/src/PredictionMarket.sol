@@ -51,6 +51,10 @@ contract PredictionMarket {
     uint256 public participantCount;
     mapping(address => bool) public isParticipant;
     
+    // Share tracking for accurate payout calculation
+    uint256 public totalYesSharesMinted;
+    uint256 public totalNoSharesMinted;
+    
     // ============ Events ============
     
     event SharesBought(
@@ -150,6 +154,7 @@ contract PredictionMarket {
         yesPool = newYesPool;
         noPool = newNoPool;
         yesShares[msg.sender] += sharesOut;
+        totalYesSharesMinted += sharesOut;
         totalVolume += msg.value;
         
         _trackParticipant(msg.sender);
@@ -185,6 +190,7 @@ contract PredictionMarket {
         yesPool = newYesPool;
         noPool = newNoPool;
         noShares[msg.sender] += sharesOut;
+        totalNoSharesMinted += sharesOut;
         totalVolume += msg.value;
         
         _trackParticipant(msg.sender);
@@ -218,6 +224,7 @@ contract PredictionMarket {
         yesPool = newYesPool;
         noPool = newNoPool;
         yesShares[msg.sender] -= sharesToSell;
+        totalYesSharesMinted -= sharesToSell;
         
         payable(msg.sender).transfer(payoutAfterFee);
         
@@ -249,6 +256,7 @@ contract PredictionMarket {
         yesPool = newYesPool;
         noPool = newNoPool;
         noShares[msg.sender] -= sharesToSell;
+        totalNoSharesMinted -= sharesToSell;
         
         payable(msg.sender).transfer(payoutAfterFee);
         
@@ -390,14 +398,12 @@ contract PredictionMarket {
         }
     }
     
-    // Note: In production, these would be tracked via events or a separate mapping
-    function _getTotalYesShares() internal pure returns (uint256) {
-        // Simplified: In production, track total shares minted
-        return INITIAL_LIQUIDITY;
+    function _getTotalYesShares() internal view returns (uint256) {
+        return totalYesSharesMinted;
     }
     
-    function _getTotalNoShares() internal pure returns (uint256) {
-        return INITIAL_LIQUIDITY;
+    function _getTotalNoShares() internal view returns (uint256) {
+        return totalNoSharesMinted;
     }
     
     // Allow contract to receive PHAR

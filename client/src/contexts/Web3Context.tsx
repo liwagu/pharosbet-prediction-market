@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react";
 import { BrowserProvider, JsonRpcSigner, formatEther } from "ethers";
+import { toast } from "sonner";
 
 // Pharos Testnet Configuration
 export const PHAROS_CONFIG = {
@@ -71,7 +72,13 @@ export function Web3Provider({ children }: { children: ReactNode }) {
 
   const connectWallet = useCallback(async () => {
     if (!window.ethereum) {
-      window.open("https://metamask.io/download/", "_blank");
+      toast.error("MetaMask not detected", {
+        description: "Please install MetaMask browser extension to connect your wallet.",
+        action: {
+          label: "Install",
+          onClick: () => window.open("https://metamask.io/download/", "_blank"),
+        },
+      });
       return;
     }
     setIsConnecting(true);
