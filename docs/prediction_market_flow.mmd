@@ -1,0 +1,106 @@
+%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#1e293b', 'primaryTextColor': '#f8fafc', 'primaryBorderColor': '#3b82f6', 'lineColor': '#64748b', 'secondaryColor': '#0f172a', 'tertiaryColor': '#1e293b', 'fontSize': '14px'}}}%%
+
+flowchart TD
+    %% ===== 阶段1: 市场创建 =====
+    START([🟢 用户持有 ETH/原生代币])
+    START --> CREATE_DECISION{想要做什么?}
+
+    CREATE_DECISION -->|创建新市场| DEFINE_EVENT[📝 定义预测事件<br/>设定描述/结束时间/结算条件]
+    CREATE_DECISION -->|参与已有市场| BROWSE[🔍 浏览市场列表<br/>查看价格/交易量/到期时间]
+
+    DEFINE_EVENT --> DEPLOY_MARKET[⚙️ 部署市场合约<br/>Factory.createMarket]
+    DEPLOY_MARKET --> SEED_LIQUIDITY[💰 注入初始流动性<br/>outcome-split: ETH → YES + NO 份额]
+    SEED_LIQUIDITY --> MARKET_ACTIVE([🟡 市场进入活跃状态])
+
+    %% ===== 阶段2: 交易参与 =====
+    BROWSE --> MARKET_ACTIVE
+    MARKET_ACTIVE --> TRADE_DECISION{交易决策}
+
+    TRADE_DECISION -->|看涨 YES| BUY_YES[📈 买入 YES 份额<br/>buyYes: ETH → YES tokens<br/>AMM 自动定价]
+    TRADE_DECISION -->|看涨 NO| BUY_NO[📉 买入 NO 份额<br/>buyNo: ETH → NO tokens<br/>AMM 自动定价]
+    TRADE_DECISION -->|提供流动性| ADD_LP[🏦 做市商注入流动性<br/>outcome-split: ETH → YES + NO<br/>同时获得两种份额]
+    TRADE_DECISION -->|卖出持仓| SELL[💱 卖出份额<br/>sell: YES/NO tokens → ETH<br/>AMM 自动定价]
+    TRADE_DECISION -->|社交分享| SHARE[📢 生成预测海报<br/>分享至 Twitter/Telegram<br/>附带邀请链接]
+
+    BUY_YES --> HOLDING_YES([持有 YES 份额])
+    BUY_NO --> HOLDING_NO([持有 NO 份额])
+    ADD_LP --> HOLDING_BOTH([持有 YES + NO 份额])
+    SELL --> GOT_ETH([收回 ETH])
+
+    HOLDING_YES --> TRADE_AGAIN{继续操作?}
+    HOLDING_NO --> TRADE_AGAIN
+    HOLDING_BOTH --> TRADE_AGAIN
+    GOT_ETH --> TRADE_AGAIN
+
+    TRADE_AGAIN -->|继续交易| TRADE_DECISION
+    TRADE_AGAIN -->|持有等待| WAIT_EXPIRY[⏳ 等待事件到期]
+    SHARE --> TRADE_AGAIN
+
+    %% ===== 阶段3: 市场到期 & 结算 =====
+    WAIT_EXPIRY --> EXPIRY_CHECK{事件是否到期?}
+    EXPIRY_CHECK -->|未到期| TRADE_DECISION
+    EXPIRY_CHECK -->|已到期| MARKET_ENDED([🔴 市场交易停止])
+
+    MARKET_ENDED --> RESOLUTION_PATH{结算路径}
+
+    %% --- 路径A: Oracle 结算 ---
+    RESOLUTION_PATH -->|路径A: Oracle 结算| ORACLE_SUBMIT[🔮 Oracle 提交结果<br/>reportOutcome: YES 或 NO]
+    ORACLE_SUBMIT --> ORACLE_RESOLVED([✅ Oracle 已裁决])
+    ORACLE_RESOLVED --> CLAIM_NORMAL[🎯 胜方领取奖池<br/>claimWinnings: 赢方份额 → ETH]
+    CLAIM_NORMAL --> FINAL_SETTLED([🏁 结算完成])
+
+    %% --- 路径B: 市场共识结算 (论文核心创新) ---
+    RESOLUTION_PATH -->|路径B: 市场共识结算| CONSENSUS_CHECK[📊 检查价格共识<br/>YES 价格是否 > 95%<br/>持续 N 个区块?]
+    CONSENSUS_CHECK -->|共识达成| AUTO_RESOLVE[⚡ 自动结算<br/>marketResolve: 无需 Oracle<br/>市场力量决定结果]
+    CONSENSUS_CHECK -->|共识未达成| WAIT_CONSENSUS[⏳ 继续等待共识<br/>或回退到 Oracle 路径]
+    WAIT_CONSENSUS --> RESOLUTION_PATH
+    AUTO_RESOLVE --> CLAIM_NORMAL
+
+    %% --- 路径C: 强制兑现 outcome-force (论文关键机制) ---
+    RESOLUTION_PATH -->|路径C: 强制兑现| FORCE_DECISION{持有哪方份额?}
+
+    FORCE_DECISION -->|持有赢方份额<br/>但输方不愿低价卖出| OUTCOME_FORCE[⚡ 强制兑现 outcome-force<br/>YES份额 → ETH + 附带历史标记<br/>无需配对 NO 份额<br/>无需等待 Oracle]
+    FORCE_DECISION -->|持有输方份额<br/>理性选择| SELL_CHEAP[📉 低价卖出输方份额<br/>给赢方做 outcome-combine]
+
+    OUTCOME_FORCE --> ENCUMBERED_COINS([💎 获得带历史标记的代币<br/>coins with encumbered history<br/>标记: 我认为 YES 赢了])
+    SELL_CHEAP --> RECOVER_SOME([💸 回收少量 ETH])
+
+    ENCUMBERED_COINS --> ACCEPTANCE{市场是否接受<br/>带标记的代币?}
+    ACCEPTANCE -->|被广泛接受<br/>共识事实| SPEND_NORMAL[✅ 正常使用<br/>等同于普通代币]
+    ACCEPTANCE -->|不被接受<br/>有争议事件| DISCOUNT_SPEND[⚠️ 折价使用<br/>承担一定风险]
+
+    SPEND_NORMAL --> FINAL_SETTLED
+    DISCOUNT_SPEND --> FINAL_SETTLED
+    RECOVER_SOME --> FINAL_SETTLED
+
+    %% --- 路径D: 配对赎回 outcome-combine ---
+    RESOLUTION_PATH -->|路径D: 配对赎回| HAVE_BOTH{同时持有<br/>YES + NO 份额?}
+    HAVE_BOTH -->|是| OUTCOME_COMBINE[🔄 配对赎回 outcome-combine<br/>YES + NO → 原始 ETH<br/>获得干净无标记的代币]
+    HAVE_BOTH -->|否, 需要买入对手方| BUY_COUNTER[💱 在市场买入<br/>缺少的那方份额]
+    BUY_COUNTER --> OUTCOME_COMBINE
+    OUTCOME_COMBINE --> CLEAN_COINS([💰 获得干净代币<br/>无历史标记])
+    CLEAN_COINS --> FINAL_SETTLED
+
+    %% ===== 样式定义 =====
+    classDef startEnd fill:#059669,stroke:#047857,color:#f0fdf4,stroke-width:2px
+    classDef active fill:#2563eb,stroke:#1d4ed8,color:#eff6ff,stroke-width:2px
+    classDef action fill:#1e293b,stroke:#334155,color:#e2e8f0,stroke-width:1px
+    classDef decision fill:#7c3aed,stroke:#6d28d9,color:#f5f3ff,stroke-width:2px
+    classDef warning fill:#d97706,stroke:#b45309,color:#fffbeb,stroke-width:2px
+    classDef danger fill:#dc2626,stroke:#b91c1c,color:#fef2f2,stroke-width:2px
+    classDef success fill:#059669,stroke:#047857,color:#f0fdf4,stroke-width:2px
+    classDef special fill:#0891b2,stroke:#0e7490,color:#ecfeff,stroke-width:2px
+
+    class START,FINAL_SETTLED startEnd
+    class MARKET_ACTIVE,MARKET_ENDED active
+    class CREATE_DECISION,TRADE_DECISION,EXPIRY_CHECK,RESOLUTION_PATH,FORCE_DECISION,TRADE_AGAIN,ACCEPTANCE,HAVE_BOTH decision
+    class DEFINE_EVENT,DEPLOY_MARKET,SEED_LIQUIDITY,BROWSE,BUY_YES,BUY_NO,ADD_LP,SELL,SHARE,WAIT_EXPIRY action
+    class ORACLE_SUBMIT,ORACLE_RESOLVED,CLAIM_NORMAL action
+    class CONSENSUS_CHECK,AUTO_RESOLVE,WAIT_CONSENSUS special
+    class OUTCOME_FORCE,ENCUMBERED_COINS warning
+    class SELL_CHEAP,BUY_COUNTER action
+    class OUTCOME_COMBINE,CLEAN_COINS success
+    class HOLDING_YES,HOLDING_NO,HOLDING_BOTH,GOT_ETH active
+    class SPEND_NORMAL success
+    class DISCOUNT_SPEND warning
+    class RECOVER_SOME action
